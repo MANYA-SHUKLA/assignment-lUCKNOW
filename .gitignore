@@ -1,5 +1,8 @@
 # dependencies (bun install)
 node_modules
+frontend/node_modules
+frontend/.next
+frontend/out
 
 # output
 out

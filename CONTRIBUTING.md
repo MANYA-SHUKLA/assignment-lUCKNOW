@@ -1,27 +1,51 @@
 # Contributing to Bulk Email Sender
 
-Thank you for your interest in contributing! We welcome contributions from everyone.
+Thank you for your interest in contributing. We welcome contributions from everyone.
 
-## How to Contribute
+## Project overview
 
-### 1. Fork the Repository
-- Click the "Fork" button at the top right of the repository page
-- Clone your fork locally: `git clone https://github.com/YOUR_USERNAME/bulk-email-sender.git`
+This repo is split into two apps:
 
-### 2. Set Up Your Development Environment
+| Part | Stack | Dev URL |
+|------|--------|---------|
+| **API** | Hono, Bun, SQLite, Nodemailer | http://localhost:3000 |
+| **Frontend** | Next.js 16, React 19, Tailwind CSS 4 | http://localhost:3001 |
+
+Do not change backend business logic or the database schema unless explicitly discussed in an issue. Frontend changes live under `frontend/`.
+
+## How to contribute
+
+### 1. Fork the repository
+
+- Fork the repo on GitHub
+- Clone your fork: `git clone https://github.com/YOUR_USERNAME/assignment.git`
+
+### 2. Set up your development environment
+
+**Prerequisites:** [Bun](https://bun.sh) >= 1.0, Node.js >= 18
+
+**Backend (API):**
 
 ```bash
-# Install dependencies
 bun install
-
-# Copy environment variables
 cp .env.example .env
-
-# Configure your .env file with necessary credentials
+# Set FRONTEND_URL=http://localhost:3001
+bun run dev
 ```
 
-### 3. Create a Branch
-Create a new branch for your changes:
+**Frontend (separate terminal):**
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+# NEXT_PUBLIC_API_URL=http://localhost:3000
+npm run dev
+```
+
+Open the UI at http://localhost:3001. The API runs at http://localhost:3000.
+
+### 3. Create a branch
 
 ```bash
 git checkout -b feature/your-feature-name
@@ -29,20 +53,23 @@ git checkout -b feature/your-feature-name
 git checkout -b fix/your-bug-fix-name
 ```
 
-Use descriptive branch names:
-- `feature/add-smtp-provider` for new features
-- `fix/email-validation-bug` for bug fixes
-- `docs/update-readme` for documentation
-- `refactor/improve-batch-service` for refactoring
+Branch naming:
 
-### 4. Make Your Changes
-- Write clean, readable code
-- Follow the existing code style
-- Add comments for complex logic
+- `feature/add-export-format` — new features
+- `fix/login-redirect` — bug fixes
+- `docs/update-readme` — documentation
+- `refactor/api-client` — refactoring
+
+### 4. Make your changes
+
+- Write clear, readable TypeScript
+- Match existing patterns in the area you edit
 - Keep commits focused and atomic
-- Write meaningful commit messages
+- Use meaningful commit messages
+- Prefer self-explanatory code; comment only non-obvious logic
 
-#### Commit Message Format
+#### Commit message format
+
 ```
 type(scope): brief description
 
@@ -54,135 +81,149 @@ Closes #issue_number
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Example:
-```
-feat(emailService): add support for SendGrid provider
 
-- Implement SendGrid API integration
-- Add rate limiting for SendGrid
-- Update configuration types
+```
+feat(frontend): add provider limit warning on compose page
+
+- Fetch provider info when SMTP host changes
+- Show daily limit in compose UI
 
 Closes #123
 ```
 
-### 5. Test Your Changes
-- Run existing tests: `npm test`
-- Add new tests for new functionality
-- Manually test your changes
-- Ensure no regressions are introduced
+### 5. Test your changes
 
-### 6. Submit a Pull Request
+From the repo root:
 
-1. Push your changes to your fork:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+```bash
+npm test
+```
 
-2. Go to the original repository and click "New Pull Request"
+This runs frontend ESLint and a production build (`lint:frontend` + `build:frontend`).
 
-3. Fill out the pull request template with:
-   - Clear description of changes
-   - Related issue numbers
-   - Testing instructions
-   - Screenshots (if UI changes)
+From `frontend/`:
 
-4. Wait for review and address any feedback
+```bash
+npm run lint
+npm run build
+```
 
-## Pull Request Guidelines
+Manually verify flows in the browser (login, SMTP configs, compose, reports) with both API and frontend running.
 
-### Before Submitting
-- [ ] Code follows the project's style guidelines
+### 6. Submit a pull request
+
+1. Push your branch: `git push origin feature/your-feature-name`
+2. Open a pull request against `main` (or the default branch)
+3. Fill out the PR template: description, testing steps, screenshots for UI changes
+4. Address review feedback
+
+## Pull request guidelines
+
+### Before submitting
+
+- [ ] Code follows project conventions
 - [ ] Self-review completed
-- [ ] Comments added for complex code
-- [ ] Documentation updated
-- [ ] Tests added/updated
-- [ ] All tests pass
-- [ ] No new warnings or errors
-- [ ] Branch is up to date with main
+- [ ] Documentation updated if behavior or setup changed
+- [ ] `npm test` passes from the repo root
+- [ ] No new ESLint or TypeScript errors in `frontend/`
+- [ ] Branch is up to date with the base branch
+- [ ] Backend schema and core API behavior unchanged (unless the PR is scoped to that)
 
-### PR Requirements
-- **Clear Title**: Summarize the change in one line
-- **Description**: Explain what, why, and how
-- **Link Issues**: Reference related issues
-- **Tests**: Demonstrate that changes work
-- **Documentation**: Update relevant docs
+### PR requirements
 
-### Code Review Process
-1. Maintainers will review your PR
-2. Address any requested changes
-3. Once approved, your PR will be merged
-4. Your contribution will be part of the next release!
+- **Clear title** — one-line summary
+- **Description** — what, why, and how
+- **Linked issues** — reference related issues
+- **Testing** — steps to verify
+- **Screenshots** — for UI changes
 
-## Coding Standards
+### Code review
+
+1. Maintainers review the PR
+2. You address requested changes
+3. After approval, the PR is merged
+
+## Coding standards
 
 ### TypeScript
+
 - Use TypeScript for all new code
-- Define proper types (avoid `any`)
-- Use interfaces for object shapes
-- Export types from `types.ts`
+- Avoid `any`; define types in `src/types.ts` (API) or `frontend/src/lib/types.ts` (UI)
+- Use `async/await` instead of raw promise chains
 
-### Code Style
-- Use 2 spaces for indentation
-- Use meaningful variable and function names
-- Keep functions small and focused
-- Avoid deep nesting (max 3 levels)
-- Use async/await over callbacks
+### Backend (`src/`)
 
-### File Organization
-```
-src/
-  routes/       - Express route handlers
-  services/     - Business logic
-  middleware/   - Express middleware
-  types.ts      - Type definitions
-```
+- **Routes** — `src/routes/` (Hono handlers; thin, delegate to services)
+- **Services** — `src/services/` (business logic)
+- **Middleware** — `src/middleware/` (auth, etc.)
+- **Types** — `src/types.ts`
 
-## What to Contribute
+### Frontend (`frontend/src/`)
 
-### Good First Issues
-Look for issues labeled `good first issue` or `help wanted`
+- **App routes** — `frontend/src/app/` (Next.js App Router)
+- **Components** — `frontend/src/components/`
+- **API client** — `frontend/src/lib/api/`
+- **Validation** — `frontend/src/lib/validation.ts` (Zod)
+- **Styling** — Tailwind CSS 4 only (no Bootstrap or other CSS frameworks)
 
-### Ideas for Contributions
-- 🐛 Bug fixes
-- ✨ New features (discuss in an issue first)
-- 📝 Documentation improvements
-- 🧪 Test coverage
-- 🎨 UI/UX enhancements
-- ⚡ Performance optimizations
-- 🔒 Security improvements
+### Style
 
-### Major Changes
-For significant changes, please:
-1. Open an issue first to discuss
+- 2-space indentation
+- Meaningful names for variables and functions
+- Small, focused functions
+- Avoid deep nesting where possible
+
+## What to contribute
+
+### Good first issues
+
+Look for labels such as `good first issue` or `help wanted`.
+
+### Ideas
+
+- Bug fixes
+- Frontend UX improvements (Tailwind only)
+- Documentation
+- Test coverage
+- Performance and security improvements
+
+### Major changes
+
+For large or breaking changes:
+
+1. Open an issue first
 2. Wait for maintainer feedback
-3. Ensure alignment with project goals
+3. Implement after alignment
 
-## Getting Help
+## Getting help
 
-- 📖 Check existing documentation
-- 🔍 Search existing issues
-- 💬 Open a new issue for questions
-- 📧 Contact maintainers if needed
+- Read the root [README.md](./README.md)
+- Search existing issues
+- Open a new issue for questions
 
-## Code of Conduct
+## Code of conduct
 
-### Our Standards
+### Our standards
+
 - Be respectful and inclusive
 - Welcome newcomers
 - Accept constructive criticism
-- Focus on what's best for the project
-- Show empathy towards others
+- Focus on what is best for the project
 
-### Unacceptable Behavior
+### Unacceptable behavior
+
 - Harassment or discriminatory language
 - Personal or political attacks
 - Trolling or insulting comments
 - Publishing others' private information
 - Unprofessional conduct
 
+See [.github/CODE_OF_CONDUCT.md](./.github/CODE_OF_CONDUCT.md) if present.
+
 ## License
 
-By contributing, you agree that your contributions will be licensed under the same license as the project.
+By contributing, you agree that your contributions will be licensed under the same license as the project (MIT).
 
 ## Recognition
 
-All contributors will be recognized in the project. Thank you for making this project better! 🎉
+Contributors are appreciated. Thank you for improving this project.

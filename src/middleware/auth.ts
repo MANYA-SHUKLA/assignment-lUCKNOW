@@ -12,16 +12,9 @@ declare module "hono" {
 export async function authMiddleware(c: Context, next: Next) {
   // Skip auth for login/register pages and static files
   const path = c.req.path;
-  const publicPaths = [
-    "/login",
-    "/register",
-    "/auth",
-    "/public",
-    "/css",
-    "/js",
-  ];
+  const publicPaths = ["/auth", "/health"];
 
-  if (publicPaths.some((p) => path.startsWith(p)) || path === "/") {
+  if (publicPaths.some((p) => path.startsWith(p))) {
     return await next();
   }
 

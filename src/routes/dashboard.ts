@@ -15,7 +15,7 @@ const app = new Hono();
 
 // NEW: Lightweight endpoint to check if polling is needed
 app.get("/dashboard/poll-status", (c) => {
-  const user = requireAuth(c);
+  requireAuth(c);
 
   try {
     const now = Date.now();
@@ -35,7 +35,8 @@ app.get("/dashboard/poll-status", (c) => {
         dashboardState.hasBatchJobs = hasActiveBatch;
         dashboardState.lastBatchCheck = now;
       } catch (error) {
-        console.warn("Batch service not available:", error.message);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn("Batch service not available:", msg);
         hasActiveBatch = false;
       }
     }
@@ -58,7 +59,8 @@ app.get("/dashboard/poll-status", (c) => {
         dashboardState.hasScheduledJobs = hasScheduledJobs;
         dashboardState.lastScheduledCheck = now;
       } catch (error) {
-        console.warn("Scheduler service not available:", error.message);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn("Scheduler service not available:", msg);
         hasScheduledJobs = false;
       }
     }
@@ -113,7 +115,7 @@ app.get("/dashboard/poll-status", (c) => {
 
 // NEW: Optimized dashboard data endpoint (only called when needed)
 app.get("/dashboard/data", (c) => {
-  const user = requireAuth(c);
+  requireAuth(c);
 
   try {
     let batchStatus = null;
@@ -125,7 +127,8 @@ app.get("/dashboard/data", (c) => {
         const { batchService } = require("../services/batchService");
         batchStatus = batchService.getBatchStatus();
       } catch (error) {
-        console.warn("Batch service unavailable:", error.message);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn("Batch service unavailable:", msg);
       }
     }
 
@@ -141,7 +144,8 @@ app.get("/dashboard/data", (c) => {
           )
           .slice(0, 5);
       } catch (error) {
-        console.warn("Scheduler service unavailable:", error.message);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn("Scheduler service unavailable:", msg);
       }
     }
 

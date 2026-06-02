@@ -5,11 +5,14 @@
   "main": "src/app.ts",
   "scripts": {
     "dev": "bun run --watch src/app.ts",
+    "dev:frontend": "npm run dev --prefix frontend",
     "build": "bun build src/app.ts --outdir=dist",
+    "build:frontend": "npm run build --prefix frontend",
     "start": "bun run src/app.ts",
     "clean": "rm -rf dist uploads/* logs/* data/users.db",
     "reset-db": "rm -f data/users.db data/scheduler.db",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint:frontend": "npm run lint --prefix frontend",
+    "test": "npm run lint:frontend && npm run build:frontend"
   },
   "keywords": [
     "email",
