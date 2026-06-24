@@ -5,7 +5,6 @@ import { JobDashboard } from "@/components/JobDashboard";
 import { useToast } from "@/components/ToastProvider";
 import { configApi, sendApi } from "@/lib/api";
 import type { SmtpConfig } from "@/lib/types";
-
 export default function ComposePage() {
   const { toast } = useToast();
   const [configs, setConfigs] = useState<SmtpConfig[]>([]);
